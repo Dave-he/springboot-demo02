@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<script type="text/javascript" th:inline="javascript">
+    var root = /*[[${#request.getContextPath()}]]*/"";
+    var projId = /*[[${projectId}]]*/"";
+    var modelDataList = /*[[${modelDataList}]]*/[];
+    var bimEngine = new BIMVIZ.RenderEngine({
+        projectId: projId,
+        renderDomId: 'viewport',
+        ip: "cloud.bimviz.io",
+        port: 10001,
+//                resizeMode: "fullpage",
+        key: 'e9badc48-6f20-463f-9f6b-d58cbda12f94',
+        resourcePath: '/public/bimsdk/sdk/viz/data/',
+//            camera:{
+//                default:{
+//                    target:new THREE.Vector3(),
+//                    position:new THREE.Vector3(10,0,0)
+//                },
+//                home:{
+//                    target:new THREE.Vector3(0,0,0),
+//                    position:new THREE.Vector3(0,0,0)
+//                },
+//                zoomSpeed:1,
+//                rotateSpeed:1,
+//                panSpeed:1
+//            },
+        colorTable: {
+            colorFilter: false,
+            transparentMode: 'custom',
+            colorMode: 'custom',
+            table: {
+                'IFCWALLSTANDARDCASE': [1, 1, 1, 1.0],
+                'IFCWALL': [1, 1, 1, 1.0],
+                'IFCWINDOW': [1, 1, 1, 1.0],
+                'IFCDOOR': [1, 1, 1, 1.0],
+                'IFCBEAM': [1, 1, 1, 1.0],
+                'IFCCOLUMN': [1, 1, 1, 1.0],
+                'IFCBUILDINGELEMENTPROXY': [1, 1, 1, 1.0],
+                'IFCSLAB': [1, 1, 1, 1.0],
+                'IFCFOOTING': [1, 1, 1, 1.0],
+                'IFCFURNITURE': [1, 1, 1, 1.0],
+            }
+        }
+    });
+
+    var projectManager = new BIMVIZ.ProjectManager({
+        ip: "cloud.bimviz.io",
+        port: 10001,
+        key: 'e9badc48-6f20-463f-9f6b-d58cbda12f94',
+        debug: true
+    });
+
+    // 消息输出控件，包括调试信息，进度信息
+    var msgControl = new BIMVIZ.UI.DefaultMessageControl(bimEngine, 'messages');
+    //        // 工具栏
+    var toolbar = new BIMVIZ.UI.DefaultToolBar(bimEngine);
+    //        // 添加文件控件
+    //        var fileControl = new BIMVIZ.UI.DefaultFileControl("文件", "fa-file-o");
+    //        toolbar.addControl(fileControl);
+    //        // 添加场景树控件
+    //                var spaceControl = new BIMVIZ.UI.DefaultTreesHighlightControl("场景树", "fa-tree");
+    //                toolbar.addControl(spaceControl);
+    //        // 添加类型控件
+    //        var domainControl = new BIMVIZ.UI.DefaultDomainControl("类型", "fa-map-o");
+    //        toolbar.addControl(domainControl);
+    //        // 添加属性控件
+    //        var propertyControl = new BIMVIZ.UI.DefaultPropertyControl("属性", "fa-info-circle");
+    //        toolbar.addControl(propertyControl);
+    //        // 添加搜索控件
+    //        var searchControl = new BIMVIZ.UI.DefaultSearchControl("搜索", "fa-search");
+    //        toolbar.addControl(searchControl);
+    //        // 添加标注控件
+    //        // 或者可以调用带编辑功能的版本 BIMVIZ.UI.DefaultMarkControl
+    //        var markControl = new BIMVIZ.UI.DefaultMarkControl("标注", "fa-map-marker");
+    //        toolbar.addControl(markControl);
+    //        // 添加楼层控件
+    //        var storeyControl = new BIMVIZ.UI.DefaultBuildingStoreyControl("楼层", "fa-list");
+    //        toolbar.addControl(storeyControl);
+    // 场景浏览参数设置
+    //        var roamingControl = new BIMVIZ.UI.DefaultRoamingSettingControl("漫游控制", "fa-send");
+    //        toolbar.addControl(roamingControl);
+    //        // 数据查询分析
+    //        var queryControl = new BIMVIZ.UI.DefaultDatabaseQueryControl("分析查询", "fa-database");
+    //        toolbar.addControl(queryControl);
+    //        // 添加场景树控件
+    //        var visibleControl = new BIMVIZ.UI.DefaultTreesVisibilityControl("可见树", "fa-sitemap");
+    //        toolbar.addControl(visibleControl);
+    //        // 添加选择集控件
+    //        var selectionSetControl = new BIMVIZ.UI.DefaultSelectionSetControl("选择集", "fa-th-large");
+    //        toolbar.addControl(selectionSetControl);
+    //        // 相机书签控件
+    //        var cameraBookmarkControl = new BIMVIZ.UI.DefaultCameraBookmarkControl("相机书签", "fa-camera");
+    //        toolbar.addControl(cameraBookmarkControl);
+    //        // 常规剖切控件
+    //        var fixedClipControl = new BIMVIZ.UI.DefaultFixedClipControl("常规剖切", "fa fa-columns");
+    //        toolbar.addControl(fixedClipControl);
+    //        //测量控件
+    //        var measureControl = new BIMVIZ.UI.DefaultMeasureControl("测量", "fa fa-object-ungroup");
+    //        toolbar.addControl(measureControl);
+    //        // 框选控件
+    //        var rectSelectControl = new BIMVIZ.UI.DefaultRectSelectControl("框选", "fa fa-hand-stop-o");
+    //        toolbar.addControl(rectSelectControl);
+    //        // HTML标记控件
+    //        var htmlMarkerControl = new BIMVIZ.UI.DefaultHtmlMarkerControl("HTML标记", "fa fa-flag");
+    //        toolbar.addControl(htmlMarkerControl);
+    //        var htmlMarkerControl = new BIMVIZ.UI.CustomTreeControl("工程结构", "fa fa-tree");
+    //        toolbar.addControl(htmlMarkerControl);
+    bimEngine.start();
+
+    //         bimEngine.addListener(BIMVIZ.EVENT.OnSceneLoadCompleted,function(){
+    //             // 获取模型文件id
+    //             var id=bimEngine.id;
+    //             // 隐藏该模型文件的构件
+    // //            bimEngine.showFile(id,false);
+    //         });
+
+    //        layui.use('console', layui.factory('console'));
+    //        layui.use(["echarts"],function(){
+    //            var $ = layui.$,
+    //                echarts = layui.echarts;
+    //        });
+
+    // layui.config({
+    //     base: '/public/layuiadmin/'
+    // }).use(["index","console","echarts"], function () {
+    //     var $ = layui.$,
+    //         layer = layui.layer,
+    //         admin = layui.admin,
+    //         setter = layui.setter,
+    //         request = setter.request,
+    //         console = layui.console,
+    //         echarts = layui.echarts;
+    //
+    //     //彩虹柱形图
+    //     var echcolorline = [], colorline = [
+    //         {
+    //             title: {
+    //                 show: false,
+    //                 x: 'center',
+    //                 text: '工程进度'
+    //             },
+    //             tooltip: {
+    //                 trigger: 'item'
+    //             },
+    //             calculable: true,
+    //             grid: {
+    //                 borderWidth: 0,
+    //                 x:0,
+    //                 x2:0,
+    //                 y: 30,
+    //                 y2: 0,
+    //                 width:120,
+    //                 height:100
+    //             },
+    //             xAxis: [
+    //                 {
+    //                     type: 'category',
+    //                     show: false,
+    //                     data: ['待施工', '施工中', '已完成']
+    //                 }
+    //             ],
+    //             yAxis: [
+    //                 {
+    //                     type: 'value',
+    //                     show: false
+    //                 }
+    //             ],
+    //             series: [
+    //                 {
+    //                     name: '工程进度',
+    //                     type: 'bar',
+    //                     itemStyle: {
+    //                         normal: {
+    //                             color: function (params) {
+    //                                 // build a color map as your need.
+    //                                 var colorList = [
+    //                                     '#CCCCCC', '#F6D100', '#00D2C8'
+    //                                 ];
+    //                                 return colorList[params.dataIndex]
+    //                             },
+    //                             label: {
+    //                                 show: true,
+    //                                 position: 'top',
+    //                                 formatter: '{b}\n{c}'
+    //                             }
+    //                         }
+    //                     },
+    //                     data: [12, 21, 10]
+    //                 }
+    //             ]
+    //         }
+    //     ]
+    //         , elemColorline = $('#LAY-model-info1').children('div')
+    //         , renderColorline = function (index) {
+    //         echcolorline[index] = echarts.init(elemColorline[index], layui.echartsTheme);
+    //         echcolorline[index].setOption(colorline[index]);
+    //         window.onresize = echcolorline[index].resize;
+    //     };
+    //     if (!elemColorline[0]) return;
+    //     renderColorline(0);
+    //
+    //     layer.open({
+    //         type:1,
+    //         title:false,
+    //         closeBtn:false,
+    //         resize:false,
+    //         area:['122px','122px'],
+    //         shade:0,
+    //         content:$('#CUSTOM_M_INFO_1'),
+    //         offset: 'lt'
+    //     });
+    //
+    //     var active = {
+    //         getModelData: function () {
+    //             admin.req({
+    //                 url: root + "/api/model/info/" + projId,
+    //                 type: "GET",
+    //                 contentType: "application/json; charset=utf-8",
+    //                 done: function (res) {
+    //                     if (res.data.list) {
+    //                         let list = res.data.list;
+    //                         for (let item of list) {
+    //                             if (item.state == "施工中") {
+    //                                 bimEngine.setElementVisible(item.model,true);
+    //                                 bimEngine.changeElementRGBA(item.model, [1.0, 0.722, 0.0, 1.0]);
+    //                             } else if (item.state == "施工完成") {
+    //                                 bimEngine.setElementVisible(item.model,true);
+    //                                 bimEngine.changeElementRGBA(item.model, [0, 0.588, 0.5333, 1.0]);
+    //                             } else {
+    //                                 bimEngine.setElementVisible(item.model,true);
+    //                                 bimEngine.changeElementRGBA(item.model, [1, 1, 1, 1.0]);
+    //                             }
+    //                         }
+    //                     }
+    //                 }
+    //             });
+    //         }
+    //     };
+
+    //            bimEngine.addListener(BIMVIZ.EVENT.OnPickElement, function (event) {
+    //                bimEngine.setElementVisible(event.args.elementId, true);
+    //                layer.closeAll();
+    //                layer.open({
+    //                    type: 2,
+    //                    title: "模型编号：" + event.args.elementId,
+    //                    shadeClose: true,
+    //                    shade: false,
+    //                    offset: 'rb',
+    //                    maxmin: true, //开启最大化最小化按钮
+    //                    area: ['400px', '90%'],
+    //                    content: root + "/views/project/model-info/" + event.args.elementId + "?" + [request.tokenName] + "=" + layui.data(setter.tableName)[request.tokenName]
+    //                });
+    //            });
+    //
+    //            bimEngine.addListener(BIMVIZ.EVENT.OnDbClickFlyToElementStart, function (event) {
+    //                bimEngine.setElementVisible(event.args.elementId, true);
+    //                layer.closeAll();
+    //                layer.open({
+    //                    type: 1,
+    //                    title: '视频',
+    //                    shade: false,
+    //                    maxmin: true,
+    //                    shadeClose: true,
+    //                    area:['500px','300px'],
+    ////                    content:'<video src="http://www.w3school.com.cn/i/movie.ogg"  width="320" height="240" controls="controls">Your browser does not support the video tag. </video>'
+    //                    content: '<video src="https://mjwise-test.oss-cn-qingdao.aliyuncs.com/bim/video.mp4"  width="100%" height="100%" controls="controls">Your browser does not support the video tag. </video>'
+    //                })
+    ////                layer.open({
+    ////                    type: 2,
+    ////                    title: "视频",
+    ////                    area: ['630px', '360px'],
+    ////                    shade: false,
+    ////                    shadeClose: true,
+    ////                    content: '//player.youku.com/embed/XMjY3MzgzODg0'
+    ////                });
+    //            });
+
+
+    //             bimEngine.addListener(BIMVIZ.EVENT.OnSceneLoadCompleted, function (event) {
+    // //                active.getModelData();
+    // //                setInterval(function () {
+    // //                    active.getModelData();
+    // //                }, 5000)
+    //             });
+    //
+    //         });
+
+    //        let pid = "c684929c-2c6b-4390-841d-c6969e30bcdf";
+    //        let cid = "2o1CGS8dv7c8exEPkig4pP";
+    //
+    //        projectManager.getProjectBimTree(pid, function (result) {
+    //            console.log(JSON.stringify(result));
+    //        });
+    //
+    //        projectManager.getElementById(pid, cid, function (success, result) {
+    //            console.log(JSON.stringify(result)); /// 构件的相关信息
+    //        });
+</script>
+</body>
+</html>
